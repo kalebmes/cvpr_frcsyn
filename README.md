@@ -6,6 +6,6 @@ This is the official GitHub repository for our team's contribution (**K-IBS-DS**
 
 * A shared paper will be published in the **[proceedings of the IEEE/CVF Computer Vision and Pattern Recognition Conference (CVPR) 2024](https://cvpr.thecvf.com/)**
   
-* Our Pretraied backbone, classifier head, and implementation codes will be released soon.
+* Our pre-trained models (backbone and classifier head), and implementation codes will be released soon.
   
 * **Acknowledgment**: This work was supported by the Institute for Basic Science, Republic of Korea (IBS-R029-C2).
