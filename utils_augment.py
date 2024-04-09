@@ -7,11 +7,16 @@ from torchvision import transforms
 import random 
 from PIL import ImageDraw
 
-
 ##### ##### ##### #####
 
 # Taken from GitHub repository of AdaFace
 # https://github.com/mk-minchul/AdaFace
+
+LANDMARKS = np.array([[38.29459953, 51.69630051],
+                              [73.53179932, 51.50139999],
+                              [56.02519989, 71.73660278],
+                              [41.54930115, 92.3655014],
+                              [70.72990036, 92.20410156]])
 
 class Augmenter():
 
@@ -89,10 +94,9 @@ class Augmenter():
 
         return sample
 
-
 ##### ##### ##### #####
 
-# Extending Augmenter with additional augmentations, i.e., sunglasses and mask.  
+# Extending Augmenter with additional augmentations, i.e., sunglasses and mask.
 
 class Augmenter_EXT():
 
@@ -187,36 +191,27 @@ class Augmenter_EXT():
     
     def sunglass_augmentation(self, sample):
 
-        # if sample.mode == 'RGBA':
-        #    sample = sample.convert('RGB')
+        # landmarks representing centers of the eyes
+        eye_landmarks = LANDMARKS[:2]
 
-        # Predefined landmarks representing centers of the eyes
-        landmarks = np.array([[38.29459953, 51.69630051],
-                              [73.53179932, 51.50139999]])
+        left_eye_center, right_eye_center = eye_landmarks
 
-        left_eye_center, right_eye_center = landmarks
-
-        # Calculate width and height for the sunglasses lenses based on eye distance
-        eye_distance = np.linalg.norm(landmarks[0] - landmarks[1])
+        # calculate width and height for the sunglasses lenses based on eye distance
+        eye_distance = np.linalg.norm(eye_landmarks[0] - eye_landmarks[1])
         lens_width = int(eye_distance * random.uniform(0.6, 0.8))
         lens_height = int(eye_distance * random.uniform(0.4, 0.6))
 
-        # Create a drawing context
-        # image_np = np.array(sample)
-        # sample_copy = Image.fromarray(image_np.copy())
-        # sample_copy = sample.copy()
         new = np.array(sample)
         sample = Image.fromarray(new.astype(np.uint8))
         draw = ImageDraw.Draw(sample)
 
-        # Draw the sunglasses with full opacity in RGB mode
-        fill_color = (0, 0, 0)  # Solid black color without alpha component
+        fill_color = (0, 0, 0)
         left_rect_box = [left_eye_center[0] - lens_width // 2, left_eye_center[1] - lens_height // 2,
                          left_eye_center[0] + lens_width // 2, left_eye_center[1] + lens_height // 2]
         right_rect_box = [right_eye_center[0] - lens_width // 2, right_eye_center[1] - lens_height // 2,
                           right_eye_center[0] + lens_width // 2, right_eye_center[1] + lens_height // 2]
 
-        # Draw opaque rectangles for sunglasses lenses
+        # draw opaque rectangles for sunglasses lenses
         draw.rectangle(left_rect_box, fill=fill_color)
         draw.rectangle(right_rect_box, fill=fill_color)
 
@@ -224,31 +219,24 @@ class Augmenter_EXT():
     
     def masking_augmentation(self, sample):
         
-        # Convert PIL Image to numpy array
         image_np = np.array(sample)
         
-        # Example landmarks: [right_eye, left_eye, nose, left_mouth_corner, right_mouth_corner]
-        landmarks = np.array([[38.29459953, 51.69630051],
-                              [73.53179932, 51.50139999],
-                              [56.02519989, 71.73660278],
-                              [41.54930115, 92.3655014],
-                              [70.72990036, 92.20410156]])
-        
         # Use the nose landmark to determine the starting line of the mask
-        nose_lm = landmarks[2]
+        nose_lm = LANDMARKS[2]
         line_y = int(nose_lm[1])
         
-        # Calculate width based on eye landmarks to estimate face width
-        eyes_lm = landmarks[:2]
-        face_width = int(np.linalg.norm(eyes_lm[0] - eyes_lm[1]))
-        margin = face_width // 2
+        ###### (OPTIONAL) - UNCOMMENT TO ACTIVATE #########
+        # eyes_lm = LANDMARKS[:2]
+        # face_width = int(np.linalg.norm(eyes_lm[0] - eyes_lm[1]))
+        # margin = face_width // 2
+            
+        # mid_x = image_np.shape[1] // 2 
+        # start_x = max(0, mid_x - margin) 
+        # end_x = min(image_np.shape[1], mid_x + margin) 
+        # image_np[line_y:, start_x:end_x] = 0
+        #####################################################
         
-        # Apply mask only to the lower part of the face, below the nose
-        mid_x = image_np.shape[1] // 2  # Midpoint of image width
-        start_x = max(0, mid_x - margin)  # Avoid negative indices
-        end_x = min(image_np.shape[1], mid_x + margin)  # Avoid indices beyond image width
+        image_np[line_y:, :] = 0
         
-        image_np[line_y:, :] = 0  # Apply mask
-        
-        # Convert numpy array back to PIL Image and return
+        # Convert numpy array back to PIL Image
         return Image.fromarray(image_np)
