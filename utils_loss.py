@@ -68,7 +68,7 @@ class SlackedAdaFace(nn.Module):
         ##### #####
         
         self.m = m 
-        self.eps = 1e-3
+        self.eps = 1e-4
         self.h = h
         self.s = s
 
@@ -86,12 +86,13 @@ class SlackedAdaFace(nn.Module):
         cosine = torch.mm(embbedings,kernel_norm)
         cosine = cosine.clamp(-1+self.eps, 1-self.eps) # for stability
 
+        # Restrict soft_norms to be in the range of [0, 1]
         safe_norms = torch.clip(norms, min=0.001, max=100) / 100 # for stability
         safe_norms = norms.clone().detach()
 
         ##### #####
         
-        # Define slacked margin, and update batchmean, batchstd
+        # Define slacked margin, and update batch_mean, batch_std
         with torch.no_grad():
             
             slacked_norms = define_SlackedNorm(label, cosine, safe_norms)
