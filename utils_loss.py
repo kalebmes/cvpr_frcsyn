@@ -95,7 +95,8 @@ class SlackedAdaFace(nn.Module):
         with torch.no_grad():
             
             slacked_norms = define_SlackedNorm(label, cosine, safe_norms)
-            
+
+            # Reset batch_mean and batch_std for every new epoch
             if first_batch is True:
                 self.batch_mean = slacked_norms.mean().detach()
                 self.batch_std = slacked_norms.std().detach()
