@@ -31,7 +31,8 @@ def define_SlackedNorm(y, y_logit_all, safe_norm):
     # SlackedFace: Learning a Slacked Margin for Low-Resolution Face Recognition
     # https://papers.bmvc2023.org/0282.pdf
     slacked_norm = y_logit_target * ( y_logit_target - y_logit_nontarget )
-    slacked_norm = 1.0 / ( 1.0 + torch.exp( -6.0 * slacked_norm ) )
+    # The slope of Sigmoidal function can be fine-tuned.
+    slacked_norm = 1.0 / ( 1.0 + torch.exp( -8.0 * slacked_norm ) )
     slacked_norm = safe_norm ** ( 1.0 - slacked_norm )
     
     return slacked_norm
