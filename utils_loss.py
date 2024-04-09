@@ -151,7 +151,6 @@ class AdaFace(nn.Module):
         
         self.out_features = out_features
         self.kernel = Parameter(torch.FloatTensor(in_features,out_features))
-        # self.kernel = Parameter(torch.FloatTensor(out_features,in_features))
 
         # initial kernel
         if ini_type.lower() == 'uniform':
@@ -173,20 +172,6 @@ class AdaFace(nn.Module):
         self.register_buffer('batch_mean', torch.ones(1)*(20))
         self.register_buffer('batch_std', torch.ones(1)*100)
 
-        '''
-        print('\AdaFace with the following properties:')
-        print('self.s', self.s)
-        print('self.m', self.m)
-        print('self.h', self.h)
-        print('self.t_alpha', self.t_alpha)
-        print()
-        '''
-        
-    '''
-    def reset_parameters(self):
-        nn.init.xavier_uniform_(self.kernel)
-    '''
-    
     def forward(self, embbedings, norms, label):
 
         kernel_norm = l2_norm(self.kernel,axis=0)
