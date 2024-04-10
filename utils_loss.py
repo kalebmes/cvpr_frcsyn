@@ -98,12 +98,23 @@ class SlackedAdaFace(nn.Module):
             slacked_norms = define_SlackedNorm(label, cosine, safe_norms)
 
             # Reset batch_mean and batch_std for every new epoch
+            """
             if first_batch is True:
                 self.batch_mean = slacked_norms.mean().detach()
                 self.batch_std = slacked_norms.std().detach()
             else:
                 self.batch_mean = self.t_alpha * slacked_norms.mean().detach() + ( 1.0 - self.t_alpha ) * self.batch_mean
                 self.batch_std =  self.t_alpha * slacked_norms.std().detach() + ( 1.0 - self.t_alpha ) * self.batch_std
+            """
+            batch_mean = slacked_norms.mean().detach()
+            batch_std = slacked_norms.std().detach()
+            
+            t_alpha = self.t_alpha
+            if first_batch is True:
+                t_alpha = 1.0
+
+            self.batch_mean = t_alpha * batch_mean + ( 1.0 - t_alpha ) * self.batch_mean
+            self.batch_std = t_alpha * batch_std + ( 1.0 - t_alpha ) * self.batch_std
             
             # **** 
 
