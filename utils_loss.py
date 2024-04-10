@@ -86,7 +86,7 @@ class SlackedAdaFace(nn.Module):
         cosine = torch.mm(embbedings,kernel_norm)
         cosine = cosine.clamp(-1+self.eps, 1-self.eps) # for stability
 
-        # Restrict soft_norms to be in the range of [0, 1]
+        # Restrict safe_norms to be in range of [0, 1]
         safe_norms = torch.clip(norms, min=0.001, max=100) / 100 # for stability
         safe_norms = norms.clone().detach()
 
